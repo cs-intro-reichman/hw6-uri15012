@@ -113,10 +113,10 @@ public class Runigram {
 	 */
 	public static Color[][] flippedVertically(Color[][] image){
 		
-		Color[][] newFlipped = new Color [image[0].length][image.length];
+		Color[][] newFlipped = new Color [image.length][image[0].length];
 
-		for (int i = 0; i< image[i].length; i++){
-			for (int j = 0; j< image.length;j++){
+		for (int i = 0; i< image.length; i++){
+			for (int j = 0; j< image[i].length;j++){
 				newFlipped [i][j] = image[(image.length -i -1)][j]; // did it wrong in the first time 
 
 			}
@@ -163,20 +163,20 @@ public class Runigram {
 	 */
 	public static Color[][] scaled(Color[][] image, int width, int height) {
 		
-		//check
 		Color [][] newImage = new Color [height][width];
-		int w0 = image[0].length; // number of columns 
-		int h0 = image.length; // number of rows 
+		int sourceHeight = image.length; 
+		int sourceWidth = image[0].length;  
 
 		for(int i =0 ; i < height; i++){
 			for(int j =0 ; j < width; j++){
-				int x = i*h0/height;
-				int y = j*w0/width;
-				newImage [i][j] = image [x][y];
+				int row = (int) (i * (double) sourceHeight/height);
+				int column = (int) (j * (double) sourceWidth/width);
+				newImage [i][j] = image [row][column];
 			}
 		}
 
 		return newImage;
+	
 	}
 
 	
@@ -187,10 +187,18 @@ public class Runigram {
 	 * values in the two input color.
 	 */
 	public static Color blend(Color c1, Color c2, double alpha) {
-		int red = (int) (alpha*c1.getRed() + (1 - alpha) *c2.getRed());
-		int green = (int)(alpha * c1.getGreen() + (1 - alpha) * c2.getGreen());
-		int blue= (int)(alpha * c1.getBlue() + (1 - alpha) * c2.getBlue());
-	
+		int r1 = c1.getRed();
+		int g1 = c1.getGreen();
+		int b1 = c1.getBlue();
+
+		int r2 = c2.getRed();
+		int g2 = c2.getGreen();
+		int b2 = c2.getBlue();
+
+		int red   = (int) (alpha * r1 +  (1 - alpha) * r2);
+		int green = (int) (alpha * g1 +  (1 - alpha) * g2);
+		int blue  = (int) (alpha * b1 +  (1 - alpha) * b2);
+
 		return new Color(red, green, blue);
 	}
 
@@ -203,11 +211,11 @@ public class Runigram {
 	 */
 	public static Color[][] blend(Color[][] image1, Color[][] image2, double alpha) {
 		
-		Color[][] blendImage= new Color [image1.length][image1[0].length]; // the two images are the same 
+		Color[][] blendImage= new Color[image1.length][image1[0].length]; // the two images are the same 
 
-		for(int i =0 ; i < image1.length ; i++){
-			for(int j =0 ; j <image1[0].length ; j++){
-				blendImage [i][j] = blend(image1[i][j],image1 [i][j],alpha);
+		for(int i = 0 ; i < image1.length ; i++){
+			for(int j = 0 ; j <image1[0].length ; j++){
+				blendImage[i][j] = blend(image1[i][j], image2[i][j], alpha);
 			}
 		}
 		
@@ -232,20 +240,26 @@ public class Runigram {
 			Color[][] scaledTarget = scaled(target, width, height);
 		
 			for (int step = 0; step < n; step++) {
-				double alpha = (double) step / n;
+				double alpha = (double) (n-step) / n;
 		
 				Color[][] intermediate = new Color[height][width];
 		
-				for (int i = 0; i < height; i++) {
-					for (int j = 0; j < width; j++) {
-						// Blend the colors of the source and the scaled target
-						intermediate[i][j] = blend(source[i][j], scaledTarget[i][j], alpha);
-					}
 				
+					for (int i = 0; i < height; i++) {
+						for (int j = 0; j < width; j++) {
+							// Blend the colors of the source and the scaled target
+							intermediate[i][j] = blend(source[i][j], scaledTarget[i][j], alpha);
+						}
+	
+		}
+		Runigram.display (intermediate);
+		StdDraw.pause(500);
+	}
+		}
+		
 
-	}
-}
-	}
+	
+
 	
 	/** Creates a canvas for the given image. */
 	public static void setCanvas(Color[][] image) {
